@@ -6,11 +6,10 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 
 const { default: mongoose } = require('mongoose');
-const passport = require('passport');
 const session = require('express-session');
 const { default: axios } = require('axios');
 const cors = require('cors')
-require('./strategies/local-strategy')
+const { jwt } = require('./middlewares/auth');
 
 var app = express();
 
@@ -38,9 +37,9 @@ app.use(session({
     // maxAge: 1000 * 60 * 60 * 24 * 7
   }
 }))
-app.use(passport.initialize())
-app.use(passport.session())
 app.use(express.static(path.join(__dirname, 'public')));
+
+app.use(jwt)
 
 app.use('/api/auth', require('./routes/auth'))
 app.use('/api/pin', require('./routes/pin'))

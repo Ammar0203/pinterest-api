@@ -79,7 +79,7 @@ router.post('/update', authenticated, async function (req, res) {
     pin.description = description
     await pin.save()
   
-    return res.status(201).json({pin})
+    return res.status(200).json({pin})
   }
   catch (err) {
     return res.status(400).json(err)
@@ -99,41 +99,41 @@ router.post('/delete', authenticated, async function (req, res) {
       }
       // console.log(`File has been successfully removed.`);
     });
-    return res.status(200).send('deleted')
+    return res.status(204).send('deleted')
   }
   catch (err) {
     return res.status(400).json(err)
   }
 })
 
-router.post('/a', authenticated, async function (req, res) {
-  async function sleep(ms) {
-    return await new Promise((resolve) => {setTimeout(resolve, ms)});
-  }
-  try {
-    const files = fs.readdirSync('public/pins');
-    const pinPromises = files.map(async (file, index) => {
-      await sleep(100 * index)
-      const path = `public/pins/${file}`;
-      const { width, height } = sizeOf(path);
-      const pin = new Pin({
-        title: `Title ${file}`,
-        description: `Description ${file}`,
-        width,
-        height,
-        name: file,
-        user: req.user._id
-      });
-      await pin.save();
-    });
+// router.post('/a', authenticated, async function (req, res) {
+//   async function sleep(ms) {
+//     return await new Promise((resolve) => {setTimeout(resolve, ms)});
+//   }
+//   try {
+//     const files = fs.readdirSync('public/pins');
+//     const pinPromises = files.map(async (file, index) => {
+//       await sleep(100 * index)
+//       const path = `public/pins/${file}`;
+//       const { width, height } = sizeOf(path);
+//       const pin = new Pin({
+//         title: `Title ${file}`,
+//         description: `Description ${file}`,
+//         width,
+//         height,
+//         name: file,
+//         user: req.user._id
+//       });
+//       await pin.save();
+//     });
 
-    await Promise.all(pinPromises);
-    res.status(201).send('good');
-  } catch (err) {
-    console.error('Error reading directory:', err);
-    res.status(500).send('Internal Server Error');
-  }
-});
+//     await Promise.all(pinPromises);
+//     res.status(201).send('good');
+//   } catch (err) {
+//     console.error('Error reading directory:', err);
+//     res.status(500).send('Internal Server Error');
+//   }
+// });
 
 router.get("/:pin_name", async function (req, res) {
   try {
@@ -142,6 +142,7 @@ router.get("/:pin_name", async function (req, res) {
     let liked = false
     if(req.user){
       const {_id: user} = req.user
+      console.log(user)
       liked = await Like.findOne({pin_id: pin._id, user}) ? true : false
     }
     return res.status(200).json({pin, liked})

@@ -16,7 +16,7 @@ router.post('/', authenticated, async function (req, res) {
     const like = new Like({user, pin_id})
     await like.save()
     await Pin.updateOne({_id: pin_id}, {$inc: {likes: 1}})
-    return res.status(201).send({liked: true})
+    return res.status(200).send({liked: true})
   }
   catch (err) {
     return res.status(400).json(err)

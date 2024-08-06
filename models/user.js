@@ -1,6 +1,7 @@
 const { Schema, model } = require('mongoose');
 const bcrypt = require('bcrypt');
 const { isEmail } = require('validator')
+const jwt = require('jsonwebtoken')
 
 const userSchema = new Schema({
   name: {
@@ -47,9 +48,15 @@ userSchema.methods.comparePassword = async function(candidatePassword) {
 };
 
 userSchema.methods.toJSON = function() {
-  var obj = this.toObject();
+  const obj = this.toObject();
   delete obj.password;
   return obj;
+}
+
+userSchema.methods.signJwt = function() {
+  let data = this.toJSON()
+  data.token = jwt.sign({_id: this._id, email: this.email}, process.env.JWT_SECRET)
+  return data
 }
 
 const User = model("User", userSchema);

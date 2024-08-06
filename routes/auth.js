@@ -1,7 +1,7 @@
 const express = require("express");
 const User = require("../models/user");
 const passport = require("passport");
-const { notAuthenticated, authenticated } = require("../middlewares/auth");
+const { authenticated, notAuthenticated } = require("../middlewares/auth");
 
 const router = express.Router();
 
@@ -14,60 +14,43 @@ router.post("/signup", notAuthenticated, async function (req, res) {
     }
     const user = new User({ name, email, password });
     await user.save();
-    return res.status(201).send({ success: true });
-    // req.login(user, loginErr => {
-    //   if (loginErr) {
-    //     return next(loginErr);
-    //   }
-    //   return res.send({ success : true, message : 'authentication succeeded', user: user.toJSON() });
-    // });      
+    return res.status(201).send({ user: user.signJwt() });
   } catch (err) {
     return res.status(400).json(err);
   }
 });
 
-router.post(
-  "/login",
-  notAuthenticated,
-  function(req, res, next) {
-    passport.authenticate('local', function(err, user, info) {
-      if (err) {
-        return next(err); // will generate a 500 error
-      }
-      // Generate a JSON response reflecting authentication status
-      if(info) {
-        return res.status(400).json(info)
-      }
-      // ***********************************************************************
-      // "Note that when using a custom callback, it becomes the application's
-      // responsibility to establish a session (by calling req.login()) and send
-      // a response."
-      // Source: http://passportjs.org/docs
-      // ***********************************************************************
-      req.login(user, loginErr => {
-        if (loginErr) {
-          return next(loginErr);
-        }
-        return res.send({ success : true, message : 'authentication succeeded', user: user.toJSON() });
-      });      
-    })(req, res, next);
-  });
-
-router.get("/logout", authenticated, async function (req, res) {
-  req.logout(function (err) {
-    if (err) {
-      return next(err);
+router.post("/login", notAuthenticated, async function (req, res) {
+  try {
+    const {email, password} = req.body
+    const user = await User.findOne({ email: email });
+    if (!user) {
+      return res.status(400).json({ email: {message: "The email you entered does not belong to any account."} });
     }
-    return res.status(200).json({ message: "Logged out successfully" });
-  });
+    const isPassword = await user.comparePassword(password)
+    console.log(isPassword)
+    if (!isPassword) {
+      return res.status(400).json({ password: {message: "Incorrect password."} });
+    }
+    return res.status(200).json({user: user.signJwt() });
+  }
+  catch (err) {
+    return res.status(400).json(err)
+  }
 });
 
-router.get("/status", async function (req, res) {
-  if (req.isAuthenticated()) {
-    res.json({ loggedIn: true, user: req.user });
-  } else {
-    res.json({ loggedIn: false });
-  }
+// router.get("/logout", authenticated, async function (req, res) {
+//   req.logout(function (err) {
+//     if (err) {
+//       return next(err);
+//     }
+//     return res.status(200).json({ message: "Logged out successfully" });
+//   });
+// });
+
+router.get("/status", authenticated, async (req, res) => {
+  const user = req.user
+  return res.status(200).json({user: user.toJSON()})
 });
 
 module.exports = router;

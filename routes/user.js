@@ -45,7 +45,7 @@ router.post('/update', [authenticated, upload.single('avatar')], async function 
     }
     user.avatar = avatar ? avatar : user.avatar
     await user.save()
-    return res.status(200).json(user.toJSON())
+    return res.status(200).json({user: user.toJSON()})
   }
   catch (err) {
     return res.status(400).json(err)
