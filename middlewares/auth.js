@@ -10,7 +10,7 @@ exports.notAuthenticated = function (req, res, next) {
   return next();
 }
 
-exports.jwt  = (req, res, next) => {
+exports.jwt = () => (req, res, next) => {
   let token = req.headers['authorization'];
   if(!token) return next()
   jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {

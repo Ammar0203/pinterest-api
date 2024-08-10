@@ -39,7 +39,7 @@ app.use(session({
 }))
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use(jwt)
+app.use(jwt())
 
 app.use('/api/auth', require('./routes/auth'))
 app.use('/api/pin', require('./routes/pin'))
