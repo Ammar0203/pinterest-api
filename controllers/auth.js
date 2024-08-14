@@ -5,7 +5,7 @@ exports.signUp = async function (req, res) {
     const { name, email, password } = req.body;
     const userExists = await User.findOne({email})
     if(userExists) {
-      return res.status(400).json({email: {message: `Email is already in use`}})
+      return res.status(400).json({errors: [{msg: "Email is already in use.", path: 'email'}]})
     }
     const user = new User({ name, email, password });
     await user.save();
@@ -20,12 +20,11 @@ exports.login = async function (req, res) {
     const {email, password} = req.body
     const user = await User.findOne({ email: email });
     if (!user) {
-      return res.status(400).json({ email: {message: "The email you entered does not belong to any account."} });
+      return res.status(400).json({errors: [{msg: "The email you entered does not belong to any account.", path: 'email'}]})
     }
     const isPassword = await user.comparePassword(password)
-    console.log(isPassword)
     if (!isPassword) {
-      return res.status(400).json({ password: {message: "Incorrect password."} });
+      return res.status(400).json({errors: [{msg: "Incorrect password.", path: 'password'}]})
     }
     return res.status(200).json({user: user.signJwt() });
   }

@@ -3,8 +3,7 @@ const Pin = require('../models/pin')
 
 exports.get = async function (req, res) {
   try {
-    const { pin_id, page } = req.query
-    // const comments = await Comment.paginate({page})
+    const { pin_id } = req.query
     const comments = await Comment.find({pin_id}).populate('user', '-password')
     return res.status(200).json({comments})
   }

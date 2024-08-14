@@ -1,4 +1,5 @@
 const multer = require("multer");
+const path = require('path')
 
 const pinStorage = multer.diskStorage({
   destination: 'public/pins/',

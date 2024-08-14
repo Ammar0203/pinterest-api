@@ -6,7 +6,7 @@ const multer  = require('multer');
 const sizeOf = require('image-size')
 const fs = require('fs')
 
-exports.get = async function (req, res) {
+exports.getOne = async function (req, res) {
   try {
     const { pin_name } = req.params
     const pin = await Pin.findOne({name: pin_name}).populate('user', '-password')
@@ -16,14 +16,14 @@ exports.get = async function (req, res) {
       console.log(user)
       liked = await Like.findOne({pin_id: pin._id, user}) ? true : false
     }
-    return res.status(200).json({pin, liked})
+    return res.status(200).json({pin : {...(pin.toObject()), liked}})
   }
   catch (err) {
     return res.status(400).json(err)
   }
 }
 
-exports.getOne = async function (req, res) {
+exports.get = async function (req, res) {
   try {
     // const {limit, page, sort, where} = req.query
     const {limit, page, sort, q} = req.query
@@ -38,6 +38,7 @@ exports.getOne = async function (req, res) {
 
 exports.createOne = async function (req, res) {
   try {
+    // if(!req.file) return res.status(400).json({errors: [{msg: "Please add a pin.", path: 'pin'}]})
     const { title, description } = req.body
     const { _id: user } = req.user
     const { filename: name, path } = req.file

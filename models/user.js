@@ -1,6 +1,5 @@
 const { Schema, model } = require('mongoose');
 const bcrypt = require('bcrypt');
-const { isEmail } = require('validator')
 const jwt = require('jsonwebtoken')
 
 const userSchema = new Schema({
@@ -16,7 +15,13 @@ const userSchema = new Schema({
     trim: true,
     unique: true,
     lowercase: true,
-    validate: [ isEmail, 'invalid email' ]
+    validate: [ 
+      function(email) {
+        var re = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+        return re.test(email)
+      },
+      'invalid email' 
+    ]
   },
   password: {
     type: String,
