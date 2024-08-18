@@ -1,15 +1,11 @@
 const Like = require("../models/like");
 const Comment = require('../models/comment')
-const path = require('path');
 const Pin = require("../models/pin");
-const multer  = require('multer');
-const sizeOf = require('image-size')
-const fs = require('fs')
 
 exports.getOne = async function (req, res) {
   try {
-    const { pin_name } = req.params
-    const pin = await Pin.findOne({name: pin_name}).populate('user', '-password')
+    const { _id } = req.params
+    const pin = await Pin.findById(_id).populate('user', '-password')
     let liked = false
     if(req.user){
       const {_id: user} = req.user
@@ -38,15 +34,12 @@ exports.get = async function (req, res) {
 
 exports.createOne = async function (req, res) {
   try {
-    // if(!req.file) return res.status(400).json({errors: [{msg: "Please add a pin.", path: 'pin'}]})
-    const { title, description } = req.body
+    const { title, description, image, width, height } = req.body
     const { _id: user } = req.user
-    const { filename: name, path } = req.file
-    const {width, height} = sizeOf(path)
-  
-    const pin = new Pin({title, description, name, user, width, height})
+
+    const pin = new Pin({title, description, image, user, width, height})
     await pin.save()
-  
+    
     return res.status(201).json({pin})
   }
   catch (err) {
@@ -76,13 +69,6 @@ exports.deleteOne = async function (req, res) {
     const pin = await Pin.findByIdAndDelete(pin_id)
     await Like.deleteMany({pin_id})
     await Comment.deleteMany({pin_id})
-    fs.unlink("public/pins/" + pin.name, (err) => {
-      if (err) {
-        console.error(`Error removing file: ${err}`);
-        return;
-      }
-      // console.log(`File has been successfully removed.`);
-    });
     return res.status(204).send('deleted')
   }
   catch (err) {

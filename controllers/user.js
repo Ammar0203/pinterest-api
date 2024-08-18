@@ -1,24 +1,27 @@
 const User = require('../models/user')
 const fs = require('fs')
+const mime = require('mime-types')
 
 exports.updateOne = async function (req, res) {
   try {
     const { name } = req.body
     const { _id } = req.user
-    const oldAvatar = req.user.avatar
-    const avatar = req.file?.filename
+    const newAvatar = req.file?.filename
     const user = await User.findById(_id)
     user.name = name ? name : user.name
-    if(avatar) {
-      fs.unlink("public/avatars/" + oldAvatar, (err) => {
+    if(newAvatar) {
+      const filePath = req.file.path;
+      const mimeType = mime.lookup(req.file.originalname);
+      const file = fs.readFileSync(filePath);
+      const base64 = file.toString('base64');
+      const base64String = `data:${mimeType};base64,${base64}`;
+      fs.unlink(filePath, (err) => {
         if (err) {
-          console.error(`Error removing file: ${err}`);
-          return;
+          console.error('Failed to delete the file:', err);
         }
-        // console.log(`File has been successfully removed.`);
       });
+      user.avatar = base64String
     }
-    user.avatar = avatar ? avatar : user.avatar
     await user.save()
     return res.status(200).json({user: user.toJSON()})
   }

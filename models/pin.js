@@ -20,9 +20,8 @@ const pinSchema = new Schema({
     maxLength: 1000,
     minLength: 1,
   },
-  name: {
+  image: {
     type: String,
-    unique: true,
     required: true,
     trim: true,
   },
