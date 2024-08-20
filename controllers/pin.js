@@ -1,6 +1,30 @@
 const Like = require("../models/like");
 const Comment = require('../models/comment')
 const Pin = require("../models/pin");
+const Image = require("../models/Image");
+const LightImage = require("../models/lightImage");
+
+exports.getOneLightImage = async function (req, res) {
+  try {
+    const { _id } = req.params
+    const image = await LightImage.findOne({pin: _id})
+    return res.status(200).json({image : image.toObject()})
+  }
+  catch (err) {
+    return res.status(400).json(err)
+  }
+}
+
+exports.getOneImage = async function (req, res) {
+  try {
+    const { _id } = req.params
+    const image = await Image.findOne({pin: _id})
+    return res.status(200).json({image : image.toObject()})
+  }
+  catch (err) {
+    return res.status(400).json(err)
+  }
+}
 
 exports.getOne = async function (req, res) {
   try {
@@ -34,11 +58,17 @@ exports.get = async function (req, res) {
 
 exports.createOne = async function (req, res) {
   try {
-    const { title, description, image, width, height } = req.body
+    const { title, description, image, lightImage, width, height } = req.body
     const { _id: user } = req.user
 
-    const pin = new Pin({title, description, image, user, width, height})
+    const pin = new Pin({title, description, user, width, height})
     await pin.save()
+    
+    const pinImage = new Image({pin: pin._id, image, width, height})
+    await pinImage.save()
+    
+    const pinLightImage = new LightImage({pin: pin._id, image: lightImage, width, height})
+    await pinLightImage.save()
     
     return res.status(201).json({pin})
   }

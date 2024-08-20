@@ -10,17 +10,7 @@ exports.updateOne = async function (req, res) {
     const user = await User.findById(_id)
     user.name = name ? name : user.name
     if(newAvatar) {
-      const filePath = req.file.path;
-      const mimeType = mime.lookup(req.file.originalname);
-      const file = fs.readFileSync(filePath);
-      const base64 = file.toString('base64');
-      const base64String = `data:${mimeType};base64,${base64}`;
-      fs.unlink(filePath, (err) => {
-        if (err) {
-          console.error('Failed to delete the file:', err);
-        }
-      });
-      user.avatar = base64String
+      user.avatar = req.body.image
     }
     await user.save()
     return res.status(200).json({user: user.toJSON()})

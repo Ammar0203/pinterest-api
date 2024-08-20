@@ -10,20 +10,15 @@ const pinSchema = new Schema({
     type: String,
     required: true,
     trim: true,
-    maxLength: 64,
+    maxLength: 100,
     minLength: 1,
   },
   description: {
     type: String,
     required: true,
     trim: true,
-    maxLength: 1000,
+    maxLength: 500,
     minLength: 1,
-  },
-  image: {
-    type: String,
-    required: true,
-    trim: true,
   },
   width: {
     type: Number,
